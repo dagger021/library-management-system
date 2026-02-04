@@ -1,28 +1,33 @@
 from dataclasses import dataclass, fields, MISSING
 from os import environ
-from typing import Any
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+env_modes = ("development", "production")
+
+ACCESS_JWT_TIMEOUT = 60 # in seconds
 
 
 @dataclass(frozen=True, slots=True)
 class Config:
   JWT_SECRET: str
 
-  POSTGRES_DB: str
-  POSTGRES_PORT: int
-  POSTGRES_USER: str
-  POSTGRES_PASSWORD: str
+  DB_URL: str
+  DB_URL_ASYNC: str
 
-  LOG_LEVEL: str = "info"
+  ENV_MODE: str
+  LOG_LEVEL: str = "INFO"
 
   def __post_init__(self):
     if len(self.JWT_SECRET) < 32:
       raise ValueError("JWT_SECRET must be at least 32 characters")
-    if 0 > self.POSTGRES_PORT > (1 << 16):
-      raise ValueError("POSTGRES_PORT must be between 0-65535")
+    if self.ENV_MODE not in env_modes:
+      raise ValueError(f"ENV_MODE must be either of {env_modes}")
+
+  def is_dev(self):
+    return self.ENV_MODE == "development"
 
 
 # using singleton pattern
@@ -53,7 +58,9 @@ def get_config():
   if _CONFIG is None:
     values = {}
     for field in fields(Config):
-      val = _get_env(field.name, field.default if field.default is MISSING else None)
+      val = _get_env(
+        field.name, field.default if field.default is not MISSING else None
+      )
 
       # Basic type coercion
       if field.type is int:

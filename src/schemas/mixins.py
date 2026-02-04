@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -11,8 +11,15 @@ class UuidPkMixin:
   defaults to `gen_random_uuid()` from PostgreSQL."""
 
   id: Mapped[UUID] = mapped_column(
-    PG_UUID(True), primary_key=True, server_default="gen_random_uuid()"
+    PG_UUID(True), primary_key=True, server_default=text("gen_random_uuid()")
   )
+
+
+class IntPkMixin:
+  """Adds `id` column of **INTEGER** type, with *autoincrementing*
+  *primary key* constraint set from PostgreSQL."""
+
+  id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
 
 class CreatedAtMixin:
