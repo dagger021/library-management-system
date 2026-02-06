@@ -1,18 +1,22 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from src.constants import UserRole
-from src.core.dependencies import AuthServiceDeps, CurrentUserDeps
+from src.core.dependencies import (
+  AuthService,
+  SafeUser,
+  get_auth_service,
+  get_current_user,
+)
 from src.logger import get_logger
 from src.repositories.errors import AlreadyExists
 from src.services.errors import InvalidCreds, UserNotFound
-
-auth_router = APIRouter()
 
 INTERNAL_SERVER_ERROR = HTTPException(
   status.HTTP_500_INTERNAL_SERVER_ERROR, "internal server error"
 )
 
+auth_router = APIRouter()
 logger = get_logger()
 
 
@@ -32,7 +36,9 @@ class LoginResponse(BaseModel):
 
 
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register_user(body: RegisterRequest, auth_svc=AuthServiceDeps):
+async def register_user(
+  body: RegisterRequest, auth_svc: AuthService = Depends(get_auth_service)
+):
   try:
     await auth_svc.register(email=body.email, password=body.password, role=body.role)
 
@@ -45,7 +51,9 @@ async def register_user(body: RegisterRequest, auth_svc=AuthServiceDeps):
 
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
-async def login_user(body: LoginRequest, auth_svc=AuthServiceDeps):
+async def login_user(
+  body: LoginRequest, auth_svc: AuthService = Depends(get_auth_service)
+):
   try:
     token = await auth_svc.login(email=body.email, password=body.password)
     return LoginResponse(token=token)
@@ -62,5 +70,5 @@ async def login_user(body: LoginRequest, auth_svc=AuthServiceDeps):
 
 
 @auth_router.post("/dashboard", status_code=status.HTTP_200_OK)
-async def dashboard(user=CurrentUserDeps):
+async def dashboard(user: SafeUser = Depends(get_current_user)):
   return user

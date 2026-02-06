@@ -12,7 +12,7 @@ class UserRepository(BaseRepository):
     user = await self.session.scalar(select(User).where(User.email == email))
     return user
 
-  async def create(self, email: str, password: str, role: UserRole = UserRole.STUDENT):
+  async def create(self, email: str, password: str, role: UserRole = UserRole.MEMBER):
     password = PasswordHasher.hash(password)
     self.session.add(user := User(email=email, password=password, role=role))
     try:

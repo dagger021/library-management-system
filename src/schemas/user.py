@@ -1,12 +1,15 @@
-from uuid import UUID
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, ForeignKey, String
+from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.constants import UserRole
 from src.core.db import Base
 
-from .mixins import CreatedAtMixin, IntPkMixin, UpdatedAtMixin, UuidPkMixin
+from .mixins import CreatedAtMixin, UuidPkMixin
+
+if TYPE_CHECKING:
+  from .member import BookBorrow, MemberDetail
 
 
 class User(Base, UuidPkMixin, CreatedAtMixin):
@@ -16,27 +19,14 @@ class User(Base, UuidPkMixin, CreatedAtMixin):
   password: Mapped[str] = mapped_column(String(100))
 
   role: Mapped[UserRole] = mapped_column(
-    Enum(UserRole, name="user_role_enum", native_enum=True), default=UserRole.STUDENT
+    Enum(UserRole, name="user_role_enum", native_enum=True), default=UserRole.MEMBER
   )
 
   is_verified: Mapped[bool] = mapped_column(default=False)
   is_active: Mapped[bool] = mapped_column(default=True)
 
   # Relationships
-  student_detail: Mapped["MemberDetail"] = relationship(
+  member_detail: Mapped["MemberDetail"] = relationship(
     back_populates="user", cascade="all, delete-orphan", lazy="selectin"
   )
-
-
-class MemberDetail(Base, IntPkMixin, CreatedAtMixin, UpdatedAtMixin):
-  __tablename__ = "member_details"
-
-  user_id: Mapped[UUID] = mapped_column(
-    ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
-  )
-  user: Mapped[User] = relationship(back_populates="student_detail")
-
-  first_name: Mapped[str] = mapped_column(String(50))
-  last_name: Mapped[str] = mapped_column(String(50))
-  age: Mapped[int]
-  institute_name: Mapped[str] = mapped_column(String(100))
+  borrows: Mapped[list["BookBorrow"]] = relationship(back_populates="member")

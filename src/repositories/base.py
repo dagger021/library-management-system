@@ -8,3 +8,7 @@ class BaseRepository:
   async def save(self, *args):
     """Saves/syncs the state into the database."""
     await self.session.flush(*args)
+
+  async def commit(self):
+    """Commit the current state."""
+    await self.session.commit()
