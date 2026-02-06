@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, insert, select
 
 from src.schemas import Publisher
 
@@ -8,6 +8,18 @@ from .modifiers import modify_stmt_for_rate_limit
 
 
 class PublisherRepository(BaseRepository):
+  async def get_all(self, **kwargs):
+    """Return list of publishers.
+
+    **kwargs (dict): statement modifier
+
+    Returns:
+      Sequence[Publisher]: list of publishers
+    """
+    stmt = modify_stmt_for_rate_limit(select(Publisher), **kwargs)
+    print(stmt)
+    return (await self.session.scalars(stmt)).all()
+
   async def get_by_names(
     self, publisher_names: list[str], strict: bool = False, **kwargs
   ):
@@ -37,5 +49,42 @@ class PublisherRepository(BaseRepository):
     return publishers
 
   async def get_by_name(self, publisher_name: str):
+    """Return one publisher matches to the given publisher name.
+
+    Args:
+      publisher_name (str): publisher name
+
+    Returns:
+      Publisher|None: `Publisher` if exists, otherwise `None`.
+    """
     stmt = select(Publisher).where(Publisher.name == publisher_name)
     return await self.session.scalar(stmt)
+
+  async def create(self, publisher_names: list[str]):
+    """Insert publisher using bulk insert for efficiency.
+
+    Args:
+      publisher_names (list[str]): publisher names to insert
+    """
+    if len(publisher_names) > 0:
+      # Bulk insert
+      stmt = insert(Publisher).values([{"name": name} for name in publisher_names])
+      await self.session.execute(stmt)
+
+  async def delete(self, publisher_ids: list[int]):
+    """Delete publisher records by `publisher_ids`.
+
+    Args:
+      publisher_ids (list[int]): record ids of the publishers
+    """
+    if len(publisher_ids) > 0:
+      # Bulk delete
+      stmt = (
+        delete(Publisher).where(Publisher.id.in_(publisher_ids)).returning(Publisher.id)
+      )
+      deleted_ids = (await self.session.scalars(stmt)).all()
+      if len(deleted_ids) != len(publisher_ids):
+        uncommons = set(publisher_ids).difference(deleted_ids)
+        raise NotFound(
+          "one or more publisher not found: %s" % ", ".join(map(repr, uncommons))
+        )

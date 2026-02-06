@@ -1,9 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, status, Depends
+from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel
 
 from src.core.dependencies import AuthorService, get_author_service
+
 from .commons import skip_n_limit
 
 author_router = APIRouter()
@@ -31,15 +32,15 @@ async def create(
   await author_svc.create(names)
 
 
-@author_router.delete("/authors", status_code=status.HTTP_404_NOT_FOUND)
+@author_router.delete("/authors", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_many_by_ids(
-  author_ids: Annotated[list[int] | None, Query()] = None,
+  author_ids: list[int],
   author_svc: AuthorService = Depends(get_author_service),
 ):
   await author_svc.delete(author_ids=author_ids or [])
 
 
-@author_router.delete("/authors/{author_id}", status_code=status.HTTP_404_NOT_FOUND)
+@author_router.delete("/authors/{author_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_one_by_id(
   author_id: int, author_svc: AuthorService = Depends(get_author_service)
 ):

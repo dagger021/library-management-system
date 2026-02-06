@@ -7,7 +7,7 @@ class AuthorService(BaseService):
     self.author_repo = author_repo
 
   async def create(self, author_names: list[str]):
-    await self.author_repo.create(*author_names)
+    await self.author_repo.create(author_names=author_names)
     await self.author_repo.commit()
 
   async def delete(self, author_ids: list[int]):
@@ -15,7 +15,7 @@ class AuthorService(BaseService):
     await self.author_repo.commit()
 
   async def get_all(
-    self, skip: int | None = 0, limit: int | None = None, names: list[str] = []
+    self, names: list[str] = [], skip: int | None = 0, limit: int | None = None
   ):
     if len(names) > 0:
       return await self.author_repo.get_by_names(

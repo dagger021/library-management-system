@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select
+from sqlalchemy import delete, insert, select
 from .base import BaseRepository
 from src.schemas import Category
 from .errors import NotFound
@@ -9,10 +9,7 @@ class BookCategoryRepository(BaseRepository):
   async def get_all(self, **kwargs):
     """Return list of book categories.
 
-    Args:
-      limit (int | None = `None`): atmost number of categories to return
-      skip (int | None = `None`): skip number of categories from start
-      **kwargs (dict): statement modifier
+    **kwargs (dict): statement modifier
 
     Returns:
       Sequence[BookCategory]: list of book categories
@@ -47,13 +44,29 @@ class BookCategoryRepository(BaseRepository):
 
     return categories
 
-  async def create(self, *category_names: str):
+  async def create(self, category_names: list[str]):
     """Insert book category records using bulk insert for efficiency.
 
     Args:
-      category_names (tuple[str, ...]): category names to insert
+      category_names (list[str]): category names to insert
     """
     if len(category_names) > 0:
       # Bulk insert
       stmt = insert(Category).values([{"name": name} for name in category_names])
       await self.session.execute(stmt)
+
+  async def delete(self, category_ids: list[int]):
+    """Delete book category records by book category ids.
+
+    Args:
+      category_ids (list[int]): record ids of the book categories
+    """
+    if len(category_ids) > 0:
+      # Bulk delete
+      stmt = delete(Category).where(Category.id.in_(category_ids))
+      deleted_ids = (await self.session.execute(stmt)).all()
+      if len(deleted_ids) != len(category_ids):
+        raise NotFound(
+          "one or more categories not found: %s"
+          % ", ".join(map(repr, set(category_ids)))
+        )

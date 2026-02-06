@@ -2,20 +2,18 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from src.logger import get_logger
-from src.routes import auth_router, book_router, author_router
+from src.routes import ROUTERS
 
 load_dotenv()
 
 logger = get_logger()
-
-
 app = FastAPI(title="Library Management System")
 
 
 @app.get("/")
 async def root():
-  return "app is running 2..."
+  return "app is running..."
 
 
-for router in (auth_router, author_router, book_router):
+for router in ROUTERS:
   app.include_router(router)

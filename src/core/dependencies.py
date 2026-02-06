@@ -4,7 +4,13 @@ from fastapi import Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.services import AuthService, BookService, AuthorService
+from src.services import (
+  AuthService,
+  BookService,
+  AuthorService,
+  BookCategoryService,
+  PublisherService,
+)
 from src.constants import UserRole
 from src.core.db import get_async_session
 from src.core.security import jwt
@@ -49,6 +55,18 @@ def get_auth_service(user_repo: UserRepository = Depends(get_user_repo)):
 
 def get_author_service(author_repo: AuthorRepository = Depends(get_author_repo)):
   return AuthorService(author_repo=author_repo)
+
+
+def get_book_category_service(
+  book_category_repo: BookCategoryRepository = Depends(get_book_category_repo),
+):
+  return BookCategoryService(book_category_repo=BookCategoryRepository)
+
+
+def get_publisher_service(
+  publisher_repo: PublisherRepository = Depends(get_publisher_repo),
+):
+  return PublisherService(publisher_repo=publisher_repo)
 
 
 def get_book_service(
