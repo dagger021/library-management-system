@@ -1,7 +1,7 @@
-from src.constants import UserRole
-from src.core.security import PasswordHasher
-from src.core.security.jwt import AuthJWT, AuthPayload
-from src.repositories.user_repo import UserRepository
+from constants import UserRole
+from core.security import PasswordHasher
+from core.security.jwt import AuthJWT, AuthPayload
+from repositories.user_repo import UserRepository
 
 from .base import BaseService
 from .errors import InvalidCreds, UserNotFound
@@ -22,7 +22,7 @@ class AuthService(BaseService):
     :type email: str
     :param password: user's password
     :type password: str
-    :param role: user's role [see src.constants.UserRole]
+    :param role: user's role [see constants.UserRole]
     :type role: UserRole
 
     Raises:

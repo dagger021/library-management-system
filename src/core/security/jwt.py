@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from pydantic import BaseModel
 
-from src.config import get_config, ACCESS_JWT_TIMEOUT
-from src.constants import UserRole
+from config import get_config, ACCESS_JWT_TIMEOUT
+from constants import UserRole
 
 _JWT_SECRET = get_config().JWT_SECRET
 _JWT_ALGO = "HS256"

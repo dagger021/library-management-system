@@ -4,9 +4,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.core.db import Base
-from src.config import get_config
-from src.schemas import (  # noqa
+from core.db import Base
+from config import get_config
+from schemas import (  # noqa
   User,
   MemberDetail,
   BookBorrow,

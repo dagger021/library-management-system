@@ -2,14 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from src.services.errors import AuthorNotFound, PublisherNotFound, BookCategoryNotFound
+from services.errors import AuthorNotFound, PublisherNotFound, BookCategoryNotFound
 from src.logger import get_logger
 
-from src.core.dependencies import BookService, get_book_service
+from core.dependencies import BookService, get_book_service
 
 _BOOK_NOT_FOUND = HTTPException(status.HTTP_404_NOT_FOUND, "book not found")
 
-book_router = APIRouter()
+book_router = APIRouter(prefix="/books", tags=["books"])
 
 logger = get_logger()
 
@@ -23,7 +23,7 @@ class Book(BaseModel):
   categories: list[str] | None
 
 
-@book_router.get("/books", status_code=status.HTTP_200_OK, response_model=list[Book])
+@book_router.get("/", status_code=status.HTTP_200_OK, response_model=list[Book])
 async def get_all(
   skip: int | None = None,
   limit: int | None = None,
@@ -54,7 +54,7 @@ async def get_all(
   return books
 
 
-@book_router.post("/books", status_code=status.HTTP_201_CREATED)
+@book_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create(book: Book, book_svc: BookService = Depends(get_book_service)):
   try:
     await book_svc.create(

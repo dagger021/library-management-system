@@ -1,7 +1,10 @@
 from sqlalchemy import delete, insert, select
+from sqlalchemy.exc import IntegrityError
+
+from schemas import Category
+
 from .base import BaseRepository
-from src.schemas import Category
-from .errors import NotFound
+from .errors import AlreadyExists, NotFound
 from .modifiers import modify_stmt_for_rate_limit
 
 
@@ -53,7 +56,11 @@ class BookCategoryRepository(BaseRepository):
     if len(category_names) > 0:
       # Bulk insert
       stmt = insert(Category).values([{"name": name} for name in category_names])
-      await self.session.execute(stmt)
+      try:
+        await self.session.execute(stmt)
+      except IntegrityError as e:
+        await self.session.flush()
+        raise AlreadyExists from e
 
   async def delete(self, category_ids: list[int]):
     """Delete book category records by book category ids.

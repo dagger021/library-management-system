@@ -1,9 +1,10 @@
+from psycopg2 import IntegrityError
 from sqlalchemy import delete, insert, select
 
-from src.schemas import Publisher
+from schemas import Publisher
 
 from .base import BaseRepository
-from .errors import NotFound
+from .errors import AlreadyExists, NotFound
 from .modifiers import modify_stmt_for_rate_limit
 
 
@@ -69,7 +70,11 @@ class PublisherRepository(BaseRepository):
     if len(publisher_names) > 0:
       # Bulk insert
       stmt = insert(Publisher).values([{"name": name} for name in publisher_names])
-      await self.session.execute(stmt)
+      try:
+        await self.session.execute(stmt)
+      except IntegrityError as e:
+        await self.session.flush()
+        raise AlreadyExists from e
 
   async def delete(self, publisher_ids: list[int]):
     """Delete publisher records by `publisher_ids`.

@@ -1,5 +1,5 @@
 from .base import BaseService
-from src.repositories import BookCategoryRepository
+from repositories import BookCategoryRepository
 
 
 class BookCategoryService(BaseService):
@@ -14,11 +14,7 @@ class BookCategoryService(BaseService):
     await self.book_category_repo.delete(category_ids=category_ids)
     await self.book_category_repo.commit()
 
-  async def get_all(
-    self, names: list[str] = [], skip: int | None = 0, limit: int | None = None
-  ):
+  async def get_all(self, names: list[str] = [], **kwargs):
     if len(names) == 0:
-      return await self.book_category_repo.get_all(skip=skip, limit=limit)
-    return await self.book_category_repo.get_by_names(
-      names=names, skip=skip, limit=limit
-    )
+      return await self.book_category_repo.get_all(**kwargs)
+    return await self.book_category_repo.get_by_names(names=names, **kwargs)

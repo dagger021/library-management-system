@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.constants import BookStatus
-from src.core.db import Base
+from constants import BookStatus
+from core.db import Base
 
 from .mixins import CreatedAtMixin, IntPkMixin, UuidPkMixin
 
@@ -49,7 +49,7 @@ class BookAuthorAssociation(Base):
 class Author(Base, IntPkMixin):
   __tablename__ = "authors"
 
-  name: Mapped[str] = mapped_column(String(100))
+  name: Mapped[str] = mapped_column(String(100), unique=True)
 
   # Relationships
   books: Mapped[list["Book"]] = relationship(
@@ -60,7 +60,7 @@ class Author(Base, IntPkMixin):
 class Publisher(Base, IntPkMixin):
   __tablename__ = "publishers"
 
-  name: Mapped[str] = mapped_column(String(100))
+  name: Mapped[str] = mapped_column(String(100), unique=True)
 
   # Relationships
   books: Mapped[list["Book"]] = relationship(back_populates="publisher")
@@ -69,7 +69,7 @@ class Publisher(Base, IntPkMixin):
 class Category(Base, IntPkMixin):
   __tablename__ = "categories"
 
-  name: Mapped[str] = mapped_column(String(50))
+  name: Mapped[str] = mapped_column(String(50), unique=True)
 
   # Relationships
   books: Mapped[list["Book"]] = relationship(

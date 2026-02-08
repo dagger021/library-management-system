@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import Float, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.db import Base
+from core.db import Base
 
 from .mixins import CreatedAtMixin, IntPkMixin, UpdatedAtMixin
 

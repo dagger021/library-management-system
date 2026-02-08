@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from src.schemas import Author, Book, Category, Publisher
+from schemas import Author, Book, Category, Publisher
 
 from .base import BaseRepository
 from .errors import AlreadyExists

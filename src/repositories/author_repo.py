@@ -1,10 +1,11 @@
-from sqlalchemy import delete, select, insert
+from sqlalchemy import delete, insert, select
+from sqlalchemy.exc import IntegrityError
 
-from src.schemas import Author
-from .modifiers import modify_stmt_for_rate_limit
+from schemas import Author
 
 from .base import BaseRepository
-from .errors import NotFound
+from .errors import NotFound, AlreadyExists
+from .modifiers import modify_stmt_for_rate_limit
 
 
 class AuthorRepository(BaseRepository):
@@ -39,9 +40,10 @@ class AuthorRepository(BaseRepository):
       select(Author).where(Author.name.in_(author_names)), **kwargs
     )
     authors = (await self.session.scalars(stmt)).all()
-    if strict and len(authors) != len(author_names):
-      uncommons = set(author_names).difference(a.name for a in authors)
-      raise NotFound("authors not found: `%s`" % ", ".join(uncommons))
+    if strict:
+      if uncommons := set(author_names).difference(a.name for a in authors):
+        raise NotFound("authors not found: `%s`" % ", ".join(uncommons))
+      print(f"{uncommons = }")
 
     return authors
 
@@ -54,7 +56,11 @@ class AuthorRepository(BaseRepository):
     if len(author_names) > 0:
       # Bulk insert
       stmt = insert(Author).values([{"name": name} for name in author_names])
-      await self.session.execute(stmt)
+      try:
+        await self.session.execute(stmt)
+      except IntegrityError as e:
+        await self.session.flush()
+        raise AlreadyExists from e
 
   async def delete(self, author_ids: list[int]):
     """Delete author record(s) by `author_ids`.
@@ -64,10 +70,10 @@ class AuthorRepository(BaseRepository):
     """
     if len(author_ids) > 0:
       # Bulk delete
-      stmt = delete(Author).where(Author.id.in_(author_ids))
+      stmt = delete(Author).where(Author.id.in_(author_ids)).returning(Author.id)
       deleted_ids = (await self.session.scalars(stmt)).all()
       if len(deleted_ids) != len(author_ids):
         uncommons = set(author_ids).difference(deleted_ids)
         raise NotFound(
-          "one or more authors not found: %s", ", ".join(map(repr, uncommons))
+          "one or more authors not found: %s" % ", ".join(map(repr, uncommons))
         )

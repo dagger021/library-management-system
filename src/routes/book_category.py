@@ -3,12 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel
 
-from src.core.dependencies import get_book_category_service
-from src.services import BookCategoryService
+from core.dependencies import get_book_category_service
+from services import BookCategoryService
 
 from .commons import skip_n_limit
 
-book_category_router = APIRouter()
+book_category_router = APIRouter(prefix="/categories", tags=["book categories"])
 
 
 class BookCategory(BaseModel):
@@ -16,7 +16,7 @@ class BookCategory(BaseModel):
   name: str
 
 
-@book_category_router.get("/categories", status_code=status.HTTP_200_OK)
+@book_category_router.get("/", status_code=status.HTTP_200_OK)
 async def get_all(
   skip_n_limit: Annotated[dict, Depends(skip_n_limit)],
   names: Annotated[list[str] | None, Query()] = None,
@@ -26,7 +26,7 @@ async def get_all(
   return [BookCategory(id=c.id, name=c.name) for c in categories_db]
 
 
-@book_category_router.post("/categories", status_code=status.HTTP_201_CREATED)
+@book_category_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create(
   names: list[str],
   book_category_svc: BookCategoryService = Depends(get_book_category_service),
@@ -34,7 +34,7 @@ async def create(
   await book_category_svc.create(category_names=names)
 
 
-@book_category_router.delete("/categories", status_code=status.HTTP_204_NO_CONTENT)
+@book_category_router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_many_by_ids(
   category_ids: list[int],
   book_category_svc: BookCategoryService = Depends(get_book_category_service),
@@ -42,9 +42,7 @@ async def delete_many_by_ids(
   await book_category_svc.delete(category_ids=category_ids)
 
 
-@book_category_router.delete(
-  "/categories/{category_id}", status_code=status.HTTP_204_NO_CONTENT
-)
+@book_category_router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_one_by_id(
   category_id: int,
   book_category_svc: BookCategoryService = Depends(get_book_category_service),

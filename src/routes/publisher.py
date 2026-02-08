@@ -3,13 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status, HTTPException
 from pydantic import BaseModel
 
-from src.core.dependencies import get_publisher_service
-from src.services import PublisherService
+from core.dependencies import get_publisher_service
+from services import PublisherService
 
 from .commons import skip_n_limit
-from src.repositories.errors import NotFound
+from repositories.errors import NotFound
 
-publisher_router = APIRouter()
+publisher_router = APIRouter(prefix="/publishers", tags=['publishers'])
 
 
 class Publisher(BaseModel):
@@ -17,7 +17,7 @@ class Publisher(BaseModel):
   name: str
 
 
-@publisher_router.get("/publishers", status_code=status.HTTP_200_OK)
+@publisher_router.get("/", status_code=status.HTTP_200_OK)
 async def get_all(
   skip_n_limit: Annotated[dict, Depends(skip_n_limit)],
   names: Annotated[list[str] | None, Query()] = None,
@@ -27,7 +27,7 @@ async def get_all(
   return [Publisher(id=c.id, name=c.name) for c in publishers_db]
 
 
-@publisher_router.post("/publishers", status_code=status.HTTP_201_CREATED)
+@publisher_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create(
   names: list[str],
   publisher_svc: PublisherService = Depends(get_publisher_service),
@@ -35,7 +35,7 @@ async def create(
   await publisher_svc.create(publisher_names=names)
 
 
-@publisher_router.delete("/publishers", status_code=status.HTTP_204_NO_CONTENT)
+@publisher_router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_many_by_ids(
   publisher_ids: list[int],
   publisher_svc: PublisherService = Depends(get_publisher_service),
@@ -48,7 +48,7 @@ async def delete_many_by_ids(
 
 
 @publisher_router.delete(
-  "/publishers/{publisher_id}", status_code=status.HTTP_204_NO_CONTENT
+  "/{publisher_id}", status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_one_by_id(
   publisher_id: int,

@@ -1,6 +1,6 @@
 from uvicorn import run
 from src.api.main import app  # noqa
-from src.config import get_config
+from config import get_config
 
 IS_DEV = get_config().is_dev()
 

@@ -1,5 +1,5 @@
 from .base import BaseService
-from src.repositories import AuthorRepository
+from repositories import AuthorRepository
 
 
 class AuthorService(BaseService):
@@ -14,11 +14,7 @@ class AuthorService(BaseService):
     await self.author_repo.delete(author_ids=author_ids)
     await self.author_repo.commit()
 
-  async def get_all(
-    self, names: list[str] = [], skip: int | None = 0, limit: int | None = None
-  ):
+  async def get_all(self, names: list[str] = [], **kwargs):
     if len(names) > 0:
-      return await self.author_repo.get_by_names(
-        author_names=names, limit=limit, skip=skip
-      )
-    return await self.author_repo.get_all(limit=limit, skip=skip)
+      return await self.author_repo.get_by_names(author_names=names, **kwargs)
+    return await self.author_repo.get_all(**kwargs)

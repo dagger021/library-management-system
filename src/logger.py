@@ -1,6 +1,6 @@
 import logging
 
-from src.config import get_config
+from config import get_config
 
 # basic logger configuration
 logging.basicConfig(

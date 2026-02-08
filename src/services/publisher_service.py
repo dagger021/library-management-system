@@ -1,5 +1,5 @@
 from .base import BaseService
-from src.repositories import PublisherRepository
+from repositories import PublisherRepository
 
 
 class PublisherService(BaseService):
@@ -14,9 +14,7 @@ class PublisherService(BaseService):
     await self.publisher_repo.delete(publisher_ids=publisher_ids)
     await self.publisher_repo.commit()
 
-  async def get_all(
-    self, names: list[str] = [], skip: int | None = 0, limit: int | None = None
-  ):
+  async def get_all(self, names: list[str] = [], **kwargs):
     if len(names) == 0:
-      return await self.publisher_repo.get_all(skip=skip, limit=limit)
-    return await self.publisher_repo.get_by_names(names=names, skip=skip, limit=limit)
+      return await self.publisher_repo.get_all(**kwargs)
+    return await self.publisher_repo.get_by_names(names=names, **kwargs)

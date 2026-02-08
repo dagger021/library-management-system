@@ -1,22 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from src.constants import UserRole
-from src.core.dependencies import (
+from constants import UserRole
+from core.dependencies import (
   AuthService,
   SafeUser,
   get_auth_service,
   get_current_user,
 )
 from src.logger import get_logger
-from src.repositories.errors import AlreadyExists
-from src.services.errors import InvalidCreds, UserNotFound
+from repositories.errors import AlreadyExists
+from services.errors import InvalidCreds, UserNotFound
 
 INTERNAL_SERVER_ERROR = HTTPException(
   status.HTTP_500_INTERNAL_SERVER_ERROR, "internal server error"
 )
 
-auth_router = APIRouter()
+auth_router = APIRouter(tags=["auth"])
 logger = get_logger()
 
 

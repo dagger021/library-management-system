@@ -1,6 +1,6 @@
 from uuid import UUID
 from .base import BaseService
-from src.repositories import (
+from repositories import (
   BookRepository,
   BookCategoryRepository,
   AuthorRepository,

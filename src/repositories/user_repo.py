@@ -1,10 +1,11 @@
-from sqlalchemy import select, exc
+from sqlalchemy import exc, select
 
-from src.core.security import PasswordHasher
-from src.schemas import User
+from constants import UserRole
+from core.security import PasswordHasher
+from schemas import User
+
 from .base import BaseRepository
 from .errors import AlreadyExists
-from src.constants import UserRole
 
 
 class UserRepository(BaseRepository):
