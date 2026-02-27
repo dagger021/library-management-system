@@ -1,4 +1,4 @@
-from psycopg2 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import delete, insert, select
 
 from schemas import Publisher
@@ -18,7 +18,6 @@ class PublisherRepository(BaseRepository):
       Sequence[Publisher]: list of publishers
     """
     stmt = modify_stmt_for_rate_limit(select(Publisher), **kwargs)
-    print(stmt)
     return (await self.session.scalars(stmt)).all()
 
   async def get_by_names(
@@ -42,9 +41,8 @@ class PublisherRepository(BaseRepository):
       select(Publisher).where(Publisher.name.in_(publisher_names)), **kwargs
     )
     publishers = (await self.session.scalars(stmt)).all()
-
     if strict and len(publishers) != len(publisher_names):
-      uncommons = set(publisher_names).difference({"name": n} for n in publisher_names)
+      uncommons = set(publisher_names).difference(p.name for p in publishers)
       raise NotFound("publishers not found: `%s`" % ", ".join(uncommons))
 
     return publishers

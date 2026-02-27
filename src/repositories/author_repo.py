@@ -18,7 +18,6 @@ class AuthorRepository(BaseRepository):
       Sequence[BookCategory]: list of authors
     """
     stmt = modify_stmt_for_rate_limit(select(Author), **kwargs)
-    print(stmt)
     return (await self.session.scalars(stmt)).all()
 
   async def get_by_names(self, author_names: list[str], strict: bool = False, **kwargs):
@@ -40,10 +39,9 @@ class AuthorRepository(BaseRepository):
       select(Author).where(Author.name.in_(author_names)), **kwargs
     )
     authors = (await self.session.scalars(stmt)).all()
-    if strict:
-      if uncommons := set(author_names).difference(a.name for a in authors):
-        raise NotFound("authors not found: `%s`" % ", ".join(uncommons))
-      print(f"{uncommons = }")
+    if strict and len(authors) != len(author_names):
+      uncommons = set(author_names).difference(a.name for a in authors)
+      raise NotFound("authors not found: `%s`" % ", ".join(uncommons))
 
     return authors
 

@@ -1,7 +1,8 @@
 from typing import Sequence
 from uuid import UUID
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 
 from schemas import Author, Book, Category, Publisher
 
@@ -29,8 +30,19 @@ class BookRepository(BaseRepository):
 
     return (await self.session.scalars(stmt)).all()
 
-  async def get_by_title(self, title: str):
-    return await self.session.scalar(select(Book).where(Book.title == title))
+  async def get_by_isbn(self, isbn: str):
+    return await self.session.scalar(
+      select(Book)
+      .options(
+        selectinload(Book.publisher),
+        selectinload(Book.authors),
+        selectinload(Book.categories),
+      )
+      .where(Book.isbn == isbn)
+    )
+
+  async def delete_by_isbn(self, isbn: str):
+    return await delete(Book).where(Book.isbn == isbn).returning(Book.isbn)
 
   async def create(
     self,
@@ -42,16 +54,15 @@ class BookRepository(BaseRepository):
     authors: Sequence[Author],
     categories: Sequence[Category],
   ):
-    async with self.session.begin():
-      book = Book(
-        title=title,
-        isbn=isbn,
-        publisher=publisher,
-        published_year=published_year,
-        authors=authors,
-        categories=categories,
-      )
-      self.session.add(book)
+    book = Book(
+      title=title,
+      isbn=isbn,
+      publisher=publisher,
+      published_year=published_year,
+      authors=authors,
+      categories=categories,
+    )
+    self.session.add(book)
 
     try:
       await self.session.flush()

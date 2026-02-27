@@ -17,8 +17,8 @@ class UserRepository(BaseRepository):
     password = PasswordHasher.hash(password)
     self.session.add(user := User(email=email, password=password, role=role))
     try:
-      await self.session.commit()
+      await self.session.flush()
       return user.id
     except exc.IntegrityError as e:
       await self.session.rollback()
-      raise AlreadyExists from e
+      raise AlreadyExists from e    

@@ -13,6 +13,11 @@ class AuthorNotFound(Exception):
     self.msg = msg or "author not found"
 
 
+class BookNotFound(Exception):
+  def __init__(self, msg="") -> None:
+    self.msg = msg or "book not found"
+
+
 class BookCategoryNotFound(Exception):
   def __init__(self, msg="") -> None:
     self.msg = msg or "category not found"

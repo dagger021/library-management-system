@@ -1,13 +1,22 @@
 from uuid import UUID
-from .base import BaseService
+
 from repositories import (
-  BookRepository,
-  BookCategoryRepository,
   AuthorRepository,
+  BookCategoryRepository,
+  BookRepository,
   PublisherRepository,
+)
+from repositories import (
   errors as repo_errors,
 )
-from .errors import PublisherNotFound, AuthorNotFound, BookCategoryNotFound
+
+from .base import BaseService
+from .errors import (
+  AuthorNotFound,
+  BookCategoryNotFound,
+  BookNotFound,
+  PublisherNotFound,
+)
 
 
 class BookService(BaseService):
@@ -47,6 +56,7 @@ class BookService(BaseService):
       BookCategoryNotFound: if one or more categories not exist
       PublisherNotFound: if the publisher does not exist
     """
+    print("service: creating book")
     if (publisher := await self.publisher_repo.get_by_name(published_by)) is None:
       raise PublisherNotFound
 
@@ -60,7 +70,7 @@ class BookService(BaseService):
     except repo_errors.NotFound as e:
       raise BookCategoryNotFound(e.msg)
 
-    await self.book_repo.create(
+    book = await self.book_repo.create(
       title=title,
       isbn=isbn,
       publisher=publisher,
@@ -68,6 +78,14 @@ class BookService(BaseService):
       authors=_authors,
       categories=_categories,
     )
+    await self.book_repo.commit()
+
+    print("service: created book", book.id, book.isbn)
+
+  async def get_by_isbn(self, *, isbn: str):
+    if book := await self.book_repo.get_by_isbn(isbn):
+      return book
+    raise BookNotFound
 
   async def get_all(
     self,

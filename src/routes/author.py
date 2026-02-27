@@ -16,21 +16,27 @@ class Author(BaseModel):
   name: str
 
 
+class CreateAuthor(BaseModel):
+  name: str
+
+
 @author_router.get("/", status_code=status.HTTP_200_OK)
 async def get_all(
   skip_n_limit: Annotated[dict, Depends(skip_n_limit)],
   names: Annotated[list[str] | None, Query()] = None,
   author_svc: AuthorService = Depends(get_author_service),
 ):
+  """Get all authors, with pagination, and filters."""
   authors_db = await author_svc.get_all(names=names or [], **skip_n_limit)
   return [Author(id=a.id, name=a.name) for a in authors_db]
 
 
 @author_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create(
-  names: list[str], author_svc: AuthorService = Depends(get_author_service)
+  authors: list[CreateAuthor], author_svc: AuthorService = Depends(get_author_service)
 ):
-  await author_svc.create(names)
+  """Create one author or more than one authors."""
+  await author_svc.create([a.name for a in authors])
 
 
 @author_router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
@@ -38,6 +44,7 @@ async def delete_many_by_ids(
   author_ids: list[int],
   author_svc: AuthorService = Depends(get_author_service),
 ):
+  """Delete more than one authors by id. More efficient by using bulk deletion."""
   try:
     await author_svc.delete(author_ids=author_ids or [])
   except NotFound as e:
@@ -48,6 +55,7 @@ async def delete_many_by_ids(
 async def delete_one_by_id(
   author_id: int, author_svc: AuthorService = Depends(get_author_service)
 ):
+  """Delete an author by its id."""
   try:
     await author_svc.delete(author_ids=[author_id])
   except NotFound:

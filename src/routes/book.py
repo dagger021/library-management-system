@@ -2,12 +2,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from services.errors import AuthorNotFound, PublisherNotFound, BookCategoryNotFound
+from services.errors import (
+  AuthorNotFound,
+  BookNotFound,
+  PublisherNotFound,
+  BookCategoryNotFound,
+)
 from src.logger import get_logger
 
 from core.dependencies import BookService, get_book_service
 
-_BOOK_NOT_FOUND = HTTPException(status.HTTP_404_NOT_FOUND, "book not found")
 
 book_router = APIRouter(prefix="/books", tags=["books"])
 
@@ -69,3 +73,23 @@ async def create(book: Book, book_svc: BookService = Depends(get_book_service)):
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail=e.msg)
   except Exception as e:
     logger.error(f"unexpected error: {e}")
+    raise HTTPException(
+      status.HTTP_500_INTERNAL_SERVER_ERROR, detail="internal server error"
+    )
+
+
+@book_router.get("/{isbn}", status_code=status.HTTP_200_OK)
+async def get_by_isbn(isbn: str, book_svc: BookService = Depends(get_book_service)):
+  try:
+    book = await book_svc.get_by_isbn(isbn=isbn)
+    print(f"{book = }")
+    return Book(
+      title=book.title,
+      isbn=book.isbn,
+      published_year=book.published_year,
+      publisher=book.publisher.name,
+      authors=[a.name for a in book.authors],
+      categories=[c.name for c in book.categories],
+    )
+  except BookNotFound as e:
+    raise HTTPException(status.HTTP_404_NOT_FOUND, detail=e.msg)

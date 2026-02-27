@@ -70,7 +70,9 @@ class BookCategoryRepository(BaseRepository):
     """
     if len(category_ids) > 0:
       # Bulk delete
-      stmt = delete(Category).where(Category.id.in_(category_ids))
+      stmt = (
+        delete(Category).where(Category.id.in_(category_ids)).returning(Category.id)
+      )
       deleted_ids = (await self.session.execute(stmt)).all()
       if len(deleted_ids) != len(category_ids):
         raise NotFound(

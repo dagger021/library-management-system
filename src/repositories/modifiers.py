@@ -11,9 +11,9 @@ def modify_stmt_for_rate_limit[T](stmt: Select[tuple[T]], **kwargs):
   Returns:
     Select[tuple[T]]: modified select statement with limit and offset
   """
-  if (skip := kwargs.get("skip", 0)) > 0:
+  if (skip := kwargs.get("skip", 0)) and skip > 0:
     stmt = stmt.offset(skip)
-  if (limit := kwargs.get("limit", 0)) > 0:
+  if (limit := kwargs.get("limit", 0)) and limit > 0:
     stmt = stmt.limit(limit)
 
   return stmt

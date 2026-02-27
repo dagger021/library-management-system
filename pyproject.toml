@@ -31,3 +31,6 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[pytest]
+testpaths = ["tests/test_services"]
