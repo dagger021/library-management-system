@@ -12,18 +12,14 @@ class AuthService(BaseService):
     super().__init__(*args, **kwargs)
     self.user_repo = user_repo
 
-  async def register(
-    self, email: str, password: str, role: UserRole = UserRole.MEMBER
-  ):
+  async def register(self, email: str, password: str, role: UserRole = UserRole.MEMBER):
     """
     Register creates a user record in the database.
 
-    :param email: user's email
-    :type email: str
-    :param password: user's password
-    :type password: str
-    :param role: user's role [see constants.UserRole]
-    :type role: UserRole
+    Args:
+      email (str): user's email
+      password (str): user's password
+      role (UserRole): user's role enum
 
     Raises:
       repositories.AlreadyExists: if email is already registered

@@ -3,10 +3,10 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from pydantic import BaseModel
 
-from config import get_config, ACCESS_JWT_TIMEOUT
+from config import get_config
 from constants import UserRole
 
-_JWT_SECRET = get_config().JWT_SECRET
+cfg = get_config()
 _JWT_ALGO = "HS256"
 
 
@@ -36,8 +36,8 @@ class AuthJWT:
     Returns:
       str: the jwt token
     """
-    payload.exp = datetime.now(timezone.utc) + timedelta(seconds=ACCESS_JWT_TIMEOUT)
-    return jwt.encode(payload.model_dump(), key=_JWT_SECRET, algorithm=_JWT_ALGO)
+    payload.exp = datetime.now(timezone.utc) + timedelta(seconds=cfg.ACCESS_JWT_TIMEOUT)
+    return jwt.encode(payload.model_dump(), key=cfg.JWT_SECRET, algorithm=_JWT_ALGO)
 
   @staticmethod
   def validate(token: str):
@@ -55,7 +55,7 @@ class AuthJWT:
     """
     try:
       payload = AuthPayload(
-        **jwt.decode(token, key=_JWT_SECRET, algorithms=[_JWT_ALGO])
+        **jwt.decode(token, key=cfg.JWT_SECRET, algorithms=[_JWT_ALGO])
       )
     except jwt.InvalidSignatureError:
       raise InvalidJWTError

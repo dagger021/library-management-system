@@ -47,7 +47,10 @@ class GetAllTestCase:
 
 
 get_all_test_cases = [
-  pytest.param(GetAllTestCase(expected_len=len(FAKE_BOOKS)), id="without-book_ids"),
+  pytest.param(
+    GetAllTestCase(expected_len=len(FAKE_BOOKS)),
+    id="without-book_ids",
+  ),
   pytest.param(
     GetAllTestCase(kwargs={"skip": 2}, expected_len=len(FAKE_BOOKS) - 2),
     id="without-book_ids-with-skip",
@@ -60,7 +63,9 @@ get_all_test_cases = [
     GetAllTestCase(kwargs={"skip": 2, "limit": 3}, expected_len=3),
     id="without-book_ids-with-skip-n-limit",
   ),
-  pytest.param(GetAllTestCase(expected_len=3, book_ids=[1, 2, 3])),
+  pytest.param(
+    GetAllTestCase(expected_len=3, book_ids=[1, 2, 3]),
+  ),
 ]
 
 
@@ -158,7 +163,7 @@ create_test_cases = [
   pytest.param(
     CreateTestCase(
       title="Book Title",
-      isbn=FAKE_BOOKS[0]["isbn"], # already existing isbn
+      isbn=FAKE_BOOKS[0]["isbn"],  # already existing isbn
       published_year=2026,
       expected_exception=errors.AlreadyExists,
     ),

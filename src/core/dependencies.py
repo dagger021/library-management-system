@@ -24,7 +24,6 @@ from repositories import (
 )
 
 _INVALID_AUTH_TOKEN = HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid auth token")
-_EXPIRED_AUTH_TOKEN = HTTPException(status.HTTP_401_UNAUTHORIZED, "expired auth token")
 
 logger = get_logger()
 
@@ -109,7 +108,9 @@ async def get_current_user(
   except jwt.InvalidJWTError:
     raise _INVALID_AUTH_TOKEN
   except jwt.ExpiredJWTError:
-    raise _EXPIRED_AUTH_TOKEN
+    raise HTTPException(
+      status_code=status.HTTP_401_UNAUTHORIZED, detail="auth token expired"
+    )
 
   if (user := await auth_svc.user_repo.get_by_email(payload.sub)) is None:
     raise HTTPException(status.HTTP_404_NOT_FOUND, "user not found")

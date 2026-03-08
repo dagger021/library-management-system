@@ -1,20 +1,25 @@
-from os import environ
-
 import pytest
 import pytest_asyncio
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
+from config import get_config, Config
 
 from core.db import Base
 
-load_dotenv()
-TEST_DB_URL_ASYNC = environ["TEST_DB_URL_ASYNC"]
+
+@pytest.fixture(scope="session")
+def app_cfg():
+  """Fixture to provide application-level config."""
+  cfg = get_config()
+  # modify config for testing
+  cfg.ACCESS_JWT_TIMEOUT = 2  # 2 seconds for testing
+
+  return cfg
 
 
 @pytest.fixture(scope="session")
-def async_engine():
-  return create_async_engine(TEST_DB_URL_ASYNC, echo=False, poolclass=NullPool)
+def async_engine(app_cfg: Config):
+  return create_async_engine(app_cfg.TEST_DB_URL_ASYNC, echo=False, poolclass=NullPool)
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)

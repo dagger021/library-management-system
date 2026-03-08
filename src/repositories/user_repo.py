@@ -21,4 +21,4 @@ class UserRepository(BaseRepository):
       return user.id
     except exc.IntegrityError as e:
       await self.session.rollback()
-      raise AlreadyExists from e    
+      raise AlreadyExists from e

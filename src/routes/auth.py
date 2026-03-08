@@ -67,8 +67,3 @@ async def login_user(
   except Exception as e:
     logger.error("unexpected error:", e)
     raise INTERNAL_SERVER_ERROR
-
-
-@auth_router.post("/dashboard", status_code=status.HTTP_200_OK)
-async def dashboard(user: SafeUser = Depends(get_current_user)):
-  return user

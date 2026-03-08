@@ -7,18 +7,19 @@ load_dotenv()
 
 env_modes = ("development", "production")
 
-ACCESS_JWT_TIMEOUT = 60 # in seconds
 
-
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class Config:
   JWT_SECRET: str
 
   DB_URL: str
   DB_URL_ASYNC: str
+  TEST_DB_URL_ASYNC: str
 
   ENV_MODE: str
   LOG_LEVEL: str = "INFO"
+
+  ACCESS_JWT_TIMEOUT: int = 60  # in seconds
 
   def __post_init__(self):
     if len(self.JWT_SECRET) < 32:

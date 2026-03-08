@@ -101,7 +101,7 @@ async def test_create(user_repo: UserRepository, case: CreateTestCase, seed_one_
   # check by getting user by email
   user = await user_repo.get_by_email(email=case.email)
   assert user is not None  # must get some user
-  assert user_id == user.id # id is same
-  assert user.email == case.email # email is same
-  assert user.password != case.password # password is hashed, i.e., not same
-  assert user.role == case.role # role is same
+  assert user_id == user.id  # id is same
+  assert user.email == case.email  # email is same
+  assert user.password != case.password  # password is hashed, i.e., not same
+  assert user.role == case.role  # role is same

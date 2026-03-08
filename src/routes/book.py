@@ -82,7 +82,6 @@ async def create(book: Book, book_svc: BookService = Depends(get_book_service)):
 async def get_by_isbn(isbn: str, book_svc: BookService = Depends(get_book_service)):
   try:
     book = await book_svc.get_by_isbn(isbn=isbn)
-    print(f"{book = }")
     return Book(
       title=book.title,
       isbn=book.isbn,
@@ -91,5 +90,6 @@ async def get_by_isbn(isbn: str, book_svc: BookService = Depends(get_book_servic
       authors=[a.name for a in book.authors],
       categories=[c.name for c in book.categories],
     )
+
   except BookNotFound as e:
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail=e.msg)
